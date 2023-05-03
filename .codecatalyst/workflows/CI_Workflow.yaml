@@ -1,0 +1,45 @@
+Name: Workflow_66ae
+SchemaVersion: "1.0"
+
+# Optional - Set automatic triggers.
+Triggers:
+  - Type: PULLREQUEST
+    Branches:
+      - main
+    Events:
+      - REVISION
+      - OPEN
+
+# Required - Define action configurations.
+Actions:
+  Test_4a:
+    Identifier: aws/managed-test@v1.0.0
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Outputs:
+      AutoDiscoverReports:
+        Enabled: true
+        ReportNamePrefix: rpt
+    Configuration:
+      Steps:
+        - Run: mkdir docker
+        - Run: mkdir docker/dynamodb
+        - Run: sudo chmod 777 docker/dynamodb
+        - Run: docker run --name dynamodb -d -p 8000:8000 -w /home/dynamodblocal -v
+            $(pwd)/docker/dynamodb:/home/dynamodblocal/data
+            amazon/dynamodb-local:latest -jar DynamoDBLocal.jar -sharedDb
+            -dbPath ./data
+        - Run: export AWS_ACCESS_KEY_ID=123
+        - Run: export AWS_SECRET_ACCESS_KEY=123
+        - Run: export AWS_SESSION_TOKEN=123
+        - Run: mvn test
+        - Run: docker stop dynamodb
+        - Run: docker rm dynamodb
+    Compute:
+      Type: EC2
+    Environment:
+      Connections:
+        - Role: CodeCatalystPreviewDevelopmentAdministrator-dlzj0y
+          Name: "472740493008"
+      Name: test
