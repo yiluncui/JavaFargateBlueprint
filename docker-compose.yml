@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  test:
+    build: .
+    environment:
+      - CUSTOMERS_NAME
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+    ports:
+      - 80:80

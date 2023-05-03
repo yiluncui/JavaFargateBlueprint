@@ -1,0 +1,21 @@
+{
+  "script": [
+    "for directory in /projects/* ; do",
+    "  if [ -d \"$directory/.cloud9/runners\" ]; then",
+    "    REPOSITORY_DIR=$directory",
+    "  fi",
+    "done",
+    "cd $REPOSITORY_DIR",
+    "mkdir docker",
+    "mkdir docker/dynamodb",
+    "sudo chmod 777 docker/dynamodb",
+    "docker run --name dynamodb -d -p 8000:8000 -w /home/dynamodblocal -v $(pwd)/docker/dynamodb:/home/dynamodblocal/data amazon/dynamodb-local:latest -jar DynamoDBLocal.jar -sharedDb -dbPath ./data",
+    "export AWS_ACCESS_KEY_ID=123",
+    "export AWS_SECRET_ACCESS_KEY=123",
+    "export AWS_SESSION_TOKEN=123",
+    "mvn test",
+    "docker stop dynamodb",
+    "docker rm dynamodb"
+  ],
+  "info": "This runner will execute integration tests contained in the project using DynamoDB Local."
+}

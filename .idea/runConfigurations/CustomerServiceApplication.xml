@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="CustomerServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+        <option name="ACTIVE_PROFILES" />
+        <module name="CustomerService" />
+        <option name="SPRING_BOOT_MAIN_CLASS" value="com.amazon.customerService.CustomerServiceApplication" />
+        <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
+            <option name="credential" />
+            <option name="region" />
+            <option name="useCurrentConnection" value="false" />
+        </extension>
+        <method v="2">
+            <option name="Make" enabled="true" />
+        </method>
+    </configuration>
+</component>

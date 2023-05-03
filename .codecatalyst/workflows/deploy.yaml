@@ -1,0 +1,62 @@
+
+Name: copilot-deploy
+SchemaVersion: "1.0"
+
+Triggers:
+  - Type: Push
+    Branches:
+      - main
+
+Actions:
+  Build:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Configuration:
+      Steps:
+        # install
+        - Run: export AWS_REGION=us-west-2
+        - Run: wget -q https://ecs-cli-v2-release.s3.amazonaws.com/copilot-linux-v1.26.0
+        - Run: mv ./copilot-linux-v1.26.0 ./copilot-linux
+        - Run: chmod +x ./copilot-linux
+        
+        # init
+        - Run: ./copilot-linux app init web-applicationuox1c || true
+        - Run: ./copilot-linux env init --name test --profile default --default-config || true
+        - Run: ./copilot-linux env deploy --name test || true
+        - Run: ./copilot-linux svc init --name customersapi || true
+        
+        # build
+        - Run: ./copilot-linux svc package --env test --name customersapi --output-dir out
+            --upload-assets
+    Compute:
+      Type: EC2
+    Outputs:
+      Artifacts:
+        - Name: Copilot
+          Files:
+            - ./out/*
+    Environment:
+      Connections:
+        - Role: CodeCatalystPreviewDevelopmentAdministrator-dlzj0y
+          Name: 472740493008
+      Name: test
+
+  Deploy:
+    Identifier: aws/cfn-deploy@v1
+    Inputs:
+      Artifacts:
+        - Copilot
+      Sources: []
+    Configuration:
+      parameter-overrides: file:///artifacts/Deploy/Copilot/out/customersapi-test.params.json
+      role-arn: arn:aws:iam::472740493008:role/web-applicationuox1c-test-CFNExecutionRole
+      template: /artifacts/Deploy/Copilot/out/customersapi-test.stack.yml
+      region: us-west-2
+      name: web-applicationuox1c-test-customersapi
+    Environment:
+      Connections:
+        - Role: CodeCatalystPreviewDevelopmentAdministrator-dlzj0y
+          Name: 472740493008
+      Name: test
