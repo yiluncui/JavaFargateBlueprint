@@ -16,6 +16,7 @@
 package com.amazon.customerService.repository;
 
 import com.amazon.customerService.model.Customer;
+import com.amazon.customerService.service.CustomerService;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,8 @@ public class CustomerRepositoryTest {
 
     @Autowired
     CustomerRepository repository;
+    @Autowired
+    CustomerService service;
     @Autowired
     private DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private DynamoDbTable table;
@@ -97,8 +100,8 @@ public class CustomerRepositoryTest {
     public void testCreate() {
         System.out.println("Adding customer: " + testCustomer);
 
-        Customer savedCustomer = repository.save(testCustomer);
-        Customer readCustomer = repository.findById(savedCustomer.getId());
+        Customer savedCustomer = service.create(testCustomer);
+        Customer readCustomer = service.findById(savedCustomer.getId());
 
         Assert.assertEquals(savedCustomer, readCustomer);
     }
@@ -108,7 +111,7 @@ public class CustomerRepositoryTest {
     public void testRead() {
         String customerId = testCustomer.getId();
 
-        Customer tmpCustomer = repository.findById(customerId);
+        Customer tmpCustomer = service.findById(customerId);
         Assert.assertEquals(testCustomer, tmpCustomer);
     }
 
@@ -117,9 +120,9 @@ public class CustomerRepositoryTest {
     public void testUpdate() {
 
         testCustomer.setName("NewName");
-        repository.save(testCustomer);
+        service.update(testCustomer);
 
-        Customer tmpCustomer = repository.findById(testCustomer.getId());
+        Customer tmpCustomer = service.findById(testCustomer.getId());
         Assert.assertEquals(testCustomer.getName(), tmpCustomer.getName());
     }
 
@@ -127,9 +130,9 @@ public class CustomerRepositoryTest {
     @Order(4)
     public void testDelete() {
 
-        repository.deleteById(testCustomer.getId());
+        service.deleteById(testCustomer.getId());
 
-        List<Customer> customerList = repository.findAll();
+        List<Customer> customerList = service.findAll();
         Assert.assertEquals(0, customerList.size());
     }
 
