@@ -24,6 +24,8 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.SortOrder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ import java.util.List;
 public class CustomerRepository {
 
     private DynamoDbTable<Customer> table;
-    
+
     @Value("#{tableName}")
     private String tableName;
 
@@ -66,12 +68,22 @@ public class CustomerRepository {
         customerTable.scan().items().forEach(customerList::add);
 
         log.debug("Found customers: ");
-        for (Customer customer : customerList
-        ) {
+        for (Customer customer : customerList) {
             log.debug("  -> " + customer);
         }
 
         return customerList;
+    }
+
+    public List<Customer> findAllSortedByEmail(SortOrder sortOrder) {
+        log.debug("Find all customers sorted by email");
+
+        DynamoDbTable<Customer> customerTable = getTable();
+        ScanEnhancedRequest scanEnhancedRequest = ScanEnhancedRequest.builder()
+                .sortOrder(sortOrder)
+                .build();
+
+        return customerTable.scan(scanEnhancedRequest).items();
     }
 
     public void deleteById(String id) {
